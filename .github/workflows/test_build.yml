@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: '3.9' 
       - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel>2.17.0
+        run: python -m pip install cibuildwheel==2.17.0
       - name: Install gcc for mac
         if: matrix.os == 'macOS-12'
         run: |
