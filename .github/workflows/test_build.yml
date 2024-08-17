@@ -24,9 +24,14 @@ jobs:
       - name: Install gcc for mac
         if: matrix.os == 'macOS-12'
         run: |
-          brew install libomp
-          which clang
-          which python
+          brew install llvm libomp
+          echo $PATH
+          ln -sf /usr/local/bin/gcc-11 /usr/local/bin/gcc
+          ln -sf /usr/local/bin/g++-11 /usr/local/bin/g++
+          ls /usr/local/bin/gcc*
+          ls /usr/local/bin/g++*
+          gcc --version
+          g++ --version
       - name: Install gcc for mac with apple silicon
         if: matrix.os == 'macos-latest'
         run: |
@@ -53,8 +58,8 @@ jobs:
           python -m pip install wheel setuptools pip --upgrade
           python -m cibuildwheel --output-dir wheelhouse
         env:
-          # CIBW_ENVIRONMENT_MACOS: >
-          #   PATH="/usr/local/opt/llvm/bin:$PATH" LDFLAGS="-L/usr/local/opt/llvm/lib" CPPFLAGS="-I/usr/local/opt/llvm/include"
+          CIBW_ENVIRONMENT_MACOS: >
+            PATH="/usr/local/opt/llvm/bin:$PATH" LDFLAGS="-L/usr/local/opt/llvm/lib" CPPFLAGS="-I/usr/local/opt/llvm/include"
           CIBW_BUILD: cp37-* cp39-* cp312-*
           CIBW_SKIP: "*manylinux_x86_64"
           CIBW_BEFORE_BUILD_LINUX: 'if [ $(python -c "import sys; print(sys.version_info[1])") -ge 9 ]; then python -m pip install "numpy<3.0.0" --config-settings=setup-args="-Dallow-noblas=true"; fi'
