@@ -33,6 +33,7 @@ jobs:
           gcc --version
           which gcc
           g++ --version
+          which python
           which g++
       - name: Install gcc for mac with apple silicon
         if: matrix.os == 'macos-latest'
