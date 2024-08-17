@@ -9,7 +9,7 @@ jobs:
   build_wheels:
     strategy:
       matrix:
-        os: [ubuntu-22.04, windows-2019, macOS-12 ]
+        os: [ubuntu-22.04, windows-2019, macOS-12, macos-latest ]
 
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -47,6 +47,7 @@ jobs:
           which gcc
           g++ --version
           which g++
+          which python
       - name: Install g++-11 for ubuntu
         if: matrix.os == 'ubuntu-22.04'
         id: install_cc
