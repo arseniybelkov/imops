@@ -24,6 +24,7 @@ jobs:
       - name: Install gcc for mac
         if: matrix.os == 'macOS-12'
         run: |
+          brew install libomp
           which clang
           which python
       - name: Install gcc for mac with apple silicon
