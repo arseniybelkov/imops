@@ -25,9 +25,12 @@ jobs:
         if: matrix.os == 'macOS-12'
         run: |
           which clang
+          which python
+      - name: Install gcc for mac with apple silicon
         if: matrix.os == 'macos-latest'
         run: |
           which clang
+          which python
       - name: Install g++-11 for ubuntu
         if: matrix.os == 'ubuntu-22.04'
         id: install_cc
