@@ -30,6 +30,8 @@ jobs:
           export CPPFLAGS="-I/usr/local/opt/llvm/include"
           export CC=/usr/local/opt/llvm/bin/clang
           export CXX="/usr/local/opt/llvm/bin/clang++"
+          echo $PATH
+          which clang
       - name: Install g++-11 for ubuntu
         if: matrix.os == 'ubuntu-22.04'
         id: install_cc
