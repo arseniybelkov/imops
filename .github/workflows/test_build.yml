@@ -16,42 +16,23 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.9' 
-      - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==2.17.0
-      - name: Install gcc for mac
-        if: matrix.os == 'macOS-12'
-        run: |
-          brew install llvm libomp
-          echo $PATH
-          echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> /Users/runner/.bash_profile
-          export LDFLAGS="-L/usr/local/opt/llvm/lib"
-          export CPPFLAGS="-I/usr/local/opt/llvm/include"
-          export CC=/usr/local/opt/llvm/bin/clang
-      - name: Install g++-11 for ubuntu
-        if: matrix.os == 'ubuntu-22.04'
-        id: install_cc
-        uses: rlalik/setup-cpp-compiler@master
-        with:
-          compiler: g++-11
-      - name: Check compilers for ubuntu
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          ls /usr/bin/gcc*
-          ls /usr/bin/g++*
-          sudo ln -sf /usr/bin/gcc-11 /usr/bin/gcc
-          sudo ln -sf /usr/bin/g++-11 /usr/bin/g++
-          g++ --version
-          gcc --version
-      - name: Build wheels
-        run: |
-          python -m pip install --upgrade pip
-          python -m cibuildwheel --output-dir wheelhouse
+      - uses: pypa/cibuildwheel@v2.17.0
         env:
-          CIBW_ENVIRONMENT_MACOS: >
-            PATH="/usr/local/opt/llvm/bin:$PATH" LDFLAGS="-L/usr/local/opt/llvm/lib" CPPFLAGS="-I/usr/local/opt/llvm/include"
+          CIBW_TEST_REQUIRES: pytest numpy
+          CIBW_TEST_COMMAND: pytest {project}/tests
+          CIBW_ARCHS_LINUX: auto aarch64
+          CIBW_BUILD: ${{ matrix.build }}
+      # - name: Build wheels
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     python -m pip install wheel setuptools pip --upgrade
+      #     python -m cibuildwheel --output-dir wheelhouse
+      - name: Check with Twine
+        run: |
+          pipx run twine check wheelhouse/*
+        env:
+          # CIBW_ENVIRONMENT_MACOS: >
+          #   PATH="/usr/local/opt/llvm/bin:$PATH" LDFLAGS="-L/usr/local/opt/llvm/lib" CPPFLAGS="-I/usr/local/opt/llvm/include" CC="/usr/local/opt/llvm/bin/clang"
           CIBW_BUILD: cp37-* cp39-* cp312-*
           CIBW_SKIP: "*manylinux_x86_64"
           CIBW_BEFORE_BUILD_LINUX: 'if [ $(python -c "import sys; print(sys.version_info[1])") -ge 9 ]; then python -m pip install "numpy<3.0.0" --config-settings=setup-args="-Dallow-noblas=true"; fi'
