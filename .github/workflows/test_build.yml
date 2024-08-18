@@ -16,40 +16,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.9' 
-      - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==2.17.0
-      - name: Install gcc for mac
-        if: matrix.os == 'macOS-12'
+      - uses: pypa/cibuildwheel@v2.17.0
+        env:
+          CIBW_TEST_REQUIRES: pytest numpy
+          CIBW_TEST_COMMAND: pytest {project}/tests
+          CIBW_ARCHS_LINUX: auto aarch64
+          CIBW_BUILD: ${{ matrix.build }}
+      # - name: Build wheels
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     python -m pip install wheel setuptools pip --upgrade
+      #     python -m cibuildwheel --output-dir wheelhouse
+      - name: Check with Twine
         run: |
-          brew install gcc
-      - name: Install gcc for mac with Apple Silicon
-        if: matrix.os == 'macos-latest'
-        run: |
-          which clang
-          which python
-      - name: Install g++-11 for ubuntu
-        if: matrix.os == 'ubuntu-22.04'
-        id: install_cc
-        uses: rlalik/setup-cpp-compiler@master
-        with:
-          compiler: g++-11
-      - name: Check compilers for ubuntu
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          ls /usr/bin/gcc*
-          ls /usr/bin/g++*
-          sudo ln -sf /usr/bin/gcc-11 /usr/bin/gcc
-          sudo ln -sf /usr/bin/g++-11 /usr/bin/g++
-          g++ --version
-          gcc --version
-      - name: Build wheels
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install wheel setuptools pip --upgrade
-          python -m cibuildwheel --output-dir wheelhouse
+          pipx run twine check wheelhouse/*
         env:
           # CIBW_ENVIRONMENT_MACOS: >
           #   PATH="/usr/local/opt/llvm/bin:$PATH" LDFLAGS="-L/usr/local/opt/llvm/lib" CPPFLAGS="-I/usr/local/opt/llvm/include" CC="/usr/local/opt/llvm/bin/clang"
